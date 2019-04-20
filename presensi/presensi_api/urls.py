@@ -5,7 +5,8 @@ from .views import (
   Logout,
   Register,
   ProfileUser,
-  CourseMain
+  CourseMain,
+  CourseToken
 )
 
 
@@ -14,5 +15,6 @@ urlpatterns = [
   path('logout/', Logout.as_view(), name='logout'),
   path('register/', Register.as_view(), name='register'),
   path('profile/', ProfileUser.as_view(), name='profile'),
-  path('course/', CourseMain.as_view(), name='course_main')
+  path('course/', CourseMain.as_view(), name='course_main'),
+  path('course/<int:id>/token/', CourseToken.as_view(), name='course_token')
 ]

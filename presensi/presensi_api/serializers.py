@@ -5,7 +5,6 @@ from rest_framework.validators import UniqueValidator
 from uuid import uuid4
 
 
-
 class UserSerializer(serializers.Serializer):
   name = serializers.CharField(required=True, max_length=50)
   email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
@@ -27,6 +26,7 @@ class UserSerializer(serializers.Serializer):
 
 
 class CourseSerializer(serializers.Serializer):
+  id      = serializers.IntegerField()
   name    = serializers.CharField(max_length=100, required=True)
   code    = serializers.CharField(max_length=40, required=True, validators=[UniqueValidator(queryset=Course.objects.all())])
   dosen   = serializers.CharField(max_length=50, required=True)
@@ -36,3 +36,6 @@ class CourseSerializer(serializers.Serializer):
     validated_data['token'] = uuid4().hex
     course = Course.objects.create(**validated_data)
     return course
+
+class CourseTokenSerializer(serializers.Serializer):
+  token   = serializers.CharField()

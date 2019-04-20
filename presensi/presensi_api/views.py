@@ -1,7 +1,7 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
-from .serializers import UserSerializer, CourseSerializer
+from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer
 from .models import User, Course
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
@@ -79,3 +79,19 @@ class CourseMain(APIView):
     else:
       return Response(course_serializer.errors, status=HTTP_400_BAD_REQUEST)
     return Response(course_serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+
+class CourseToken(APIView):
+  permission_classes = (IsAdminUser,)
+
+  def get(self, request, id):
+    try:
+      course = Course.objects.get(pk=id)
+    except Course.DoesNotExist:
+      course = None
+    
+    if not course:
+      return Response({'error': 'Invalid Course ID'}, status=HTTP_404_NOT_FOUND)
+    else:
+      serializer = CourseTokenSerializer(course)
+      return Response(serializer.data)
