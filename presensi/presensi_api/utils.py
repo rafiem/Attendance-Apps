@@ -8,13 +8,10 @@ from rest_framework.status import (
 )
 
 
-def get_object_by_field(model_, var_input, var_field=None):
+def get_object_by_field(model_, var_input, var_field):
   try:
-    if var_field:
-      dictionary = {var_field: var_input}
-      obj = model_.objects.get(**dictionary)
-    else:
-      obj = model_.objects.get(pk=int(var_input))
+    dictionary = {var_field: var_input}
+    obj = model_.objects.get(**dictionary)
   except:
     obj = None
 

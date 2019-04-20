@@ -82,7 +82,7 @@ class CourseMain(APIView):
 class CourseUnit(APIView):
 
   def get(self, request, id):
-    course    = get_object_by_field(Course, id)
+    course    = get_object_by_field(Course, id, "pk")
     response  = get_response_by_object(CourseSerializer, course, error_msg="Invalid Course ID")
 
     return response
@@ -92,9 +92,22 @@ class CourseToken(APIView):
   permission_classes = (IsAdminUser,)
 
   def get(self, request, id):
-    course    = get_object_by_field(Course, id)
+    course    = get_object_by_field(Course, id, "pk")
     response  = get_response_by_object(CourseTokenSerializer, course, error_msg="Invalid Course ID")
 
     return response
+
+
+class ApplyCourse(APIView):
+  permission_classes = (IsAdminUser,)
+
+  def post(self, request, id):
+    if "user_id" not in request.data:
+      return Response({"error": "Parameter 'user_id' is required"})
+    course    = get_object_by_field(Course, id, "pk")
+    user      = get_object_by_field(User, request.data["user_id"], "pk")
+
+    course.user.add(user)
+    return Response({'success': 'Success adding user to the course'})
     
 

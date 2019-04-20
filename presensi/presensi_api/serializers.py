@@ -31,6 +31,16 @@ class CourseSerializer(serializers.Serializer):
   code    = serializers.CharField(max_length=40, required=True, validators=[UniqueValidator(queryset=Course.objects.all())])
   dosen   = serializers.CharField(max_length=50, required=True)
   jurusan = serializers.CharField(max_length=40, required=True)
+  start_time = serializers.DateTimeField(required=True)
+  end_time   = serializers.DateTimeField(required=True)
+
+  def validate(self, data):
+    if data["end_time"] < data["start_time"]:
+      raise serializers.ValidationError({
+          "error": "Start time cannot be greater than end time",
+      })
+
+    return super(CourseSerializer, self).validate(data)
 
   def create(self, validated_data):
     validated_data['token'] = uuid4().hex

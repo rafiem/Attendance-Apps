@@ -16,12 +16,14 @@ class User(AbstractUser):
 
 
 class Course(models.Model):
-  name    = models.CharField(max_length=100)
-  token   = models.CharField(max_length=100)
-  code    = models.CharField(max_length=40)
-  dosen   = models.CharField(max_length=50)
-  jurusan = models.CharField(max_length=40)
-  user    = models.ManyToManyField(User)
+  name        = models.CharField(max_length=100)
+  token       = models.CharField(max_length=100)
+  code        = models.CharField(max_length=40)
+  dosen       = models.CharField(max_length=50)
+  jurusan     = models.CharField(max_length=40)
+  start_time  = models.DateTimeField()
+  end_time    = models.DateTimeField()
+  user        = models.ManyToManyField(User)
 
   def __str__(self):
     return self.name
