@@ -2,7 +2,7 @@ from .models import User, Course
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth import get_user_model
+from uuid import uuid4
 
 
 
@@ -33,5 +33,6 @@ class CourseSerializer(serializers.Serializer):
   jurusan = serializers.CharField(max_length=40, required=True)
 
   def create(self, validated_data):
+    validated_data['token'] = uuid4().hex
     course = Course.objects.create(**validated_data)
     return course
