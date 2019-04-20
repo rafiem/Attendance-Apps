@@ -85,9 +85,10 @@ class CourseToken(APIView):
   permission_classes = (IsAdminUser,)
 
   def get(self, request, id):
+
     try:
-      course = Course.objects.get(pk=id)
-    except Course.DoesNotExist:
+      course = Course.objects.get(id=int(id))
+    except:
       course = None
     
     if not course:
