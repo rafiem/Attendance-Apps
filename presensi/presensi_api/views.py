@@ -1,11 +1,12 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
-from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer
-from .models import User, Course
+from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer, AttendClassSerializer
+from .models import User, Course, Attendance
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from .utils import get_object_by_field, get_response_by_object, get_response_serializer_valid
+from datetime import date, datetime, time
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -112,5 +113,27 @@ class ApplyCourse(APIView):
     return Response({'success': 'Success adding user to the course'})
 
 
+class AttendClass(APIView):
+
+  def post(self, request):
+    if "token" not in request.data:
+      return Response({"error": "Parameter 'token' is required"})
+
+    course = get_object_by_field(Course, request.data["token"], "token")
+    if not course:
+      return Response({"error": "No course is match for this token"})
+
+    member_of_course = Course.objects.filter(user__id=request.user.id, id=course.id)
+    if not member_of_course:
+      return Response({"error": "You are not a part of this course"})
+
+    data = {"user_id": request.user.id, "course_id": course.id}
+    serializer = AttendClassSerializer(data=data)
+
+    if serializer.is_valid():
+      serializer.save()
+      return Response({"success": "Success attending a course"})
+    else:
+      return Response(serializer_.errors, status=HTTP_400_BAD_REQUEST)
     
 

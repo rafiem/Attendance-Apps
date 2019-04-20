@@ -8,7 +8,8 @@ from .views import (
   CourseMain,
   CourseUnit,
   CourseToken,
-  ApplyCourse
+  ApplyCourse,
+  AttendClass
 )
 
 
@@ -20,5 +21,6 @@ urlpatterns = [
   path('course/', CourseMain.as_view(), name='course_main'),
   path('course/<str:id>/', CourseUnit.as_view(), name='course_unit'),
   path('course/<str:id>/token/', CourseToken.as_view(), name='course_token'),
-  path('course/<str:id>/apply/', ApplyCourse.as_view(), name='course_apply')
+  path('course/<str:id>/apply/', ApplyCourse.as_view(), name='course_apply'),
+  path('attend_class/', AttendClass.as_view(), name='attend_class')
 ]

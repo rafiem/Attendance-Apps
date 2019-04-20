@@ -35,10 +35,6 @@ class Attendance(models.Model):
   course        = models.ForeignKey(Course, on_delete=models.CASCADE)
   time_present  = models.DateTimeField()
 
-  def save(self, *args, **kwargs):
-    self.time_present = timezone.now()
-    
-    return super(User, self).save(*args, **kwargs)
 
 
 

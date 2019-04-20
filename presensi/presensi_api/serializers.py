@@ -1,8 +1,11 @@
-from .models import User, Course
+from .models import User, Course, Attendance
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from rest_framework.validators import UniqueValidator
+from django.utils import timezone
+from datetime import date, datetime, time
 from uuid import uuid4
+
 
 
 class UserSerializer(serializers.Serializer):
@@ -49,3 +52,29 @@ class CourseSerializer(serializers.Serializer):
 
 class CourseTokenSerializer(serializers.Serializer):
   token   = serializers.CharField()
+
+
+class AttendClassSerializer(serializers.Serializer):
+  user_id     = serializers.IntegerField()
+  course_id   = serializers.IntegerField()
+
+  def create(self, validated_data):
+    validated_data["time_present"] = datetime.now()
+    day_submit  = validated_data["time_present"].strftime('%a')
+    time_submit = validated_data["time_present"].time()
+    
+    course      = Course.objects.get(pk=validated_data["course_id"])
+
+    day_course  = course.start_time.strftime("%a")
+    start_time  = course.start_time.time()
+    end_time    = course.end_time.time()
+
+    if day_submit == day_course:
+      if time_submit >= start_time and time_submit <= end_time:
+        attend_course = Attendance.objects.create(**validated_data)
+        return attend_course
+    
+    raise serializers.ValidationError({
+      "error": "Not in time for that course schedule",
+    })
+
