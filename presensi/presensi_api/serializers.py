@@ -71,8 +71,19 @@ class AttendClassSerializer(serializers.Serializer):
 
     if day_submit == day_course:
       if time_submit >= start_time and time_submit <= end_time:
-        attend_course = Attendance.objects.create(**validated_data)
-        return attend_course
+        try:
+          already_attend = Attendance.objects.get(user_id=validated_data["user_id"], 
+          course_id=validated_data["course_id"], time_present__day=validated_data["time_present"].day)
+        except:
+          already_attend = None
+
+        if not already_attend:
+          attend_course = Attendance.objects.create(**validated_data)
+          return attend_course
+        else:
+          raise serializers.ValidationError({
+            "error": "Already submit attend on that course this week",
+          })
     
     raise serializers.ValidationError({
       "error": "Not in time for that course schedule",
