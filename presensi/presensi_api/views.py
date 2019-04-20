@@ -104,10 +104,13 @@ class ApplyCourse(APIView):
   def post(self, request, id):
     if "user_id" not in request.data:
       return Response({"error": "Parameter 'user_id' is required"})
+
     course    = get_object_by_field(Course, id, "pk")
     user      = get_object_by_field(User, request.data["user_id"], "pk")
-
     course.user.add(user)
+    
     return Response({'success': 'Success adding user to the course'})
+
+
     
 
