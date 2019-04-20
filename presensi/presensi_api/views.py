@@ -5,6 +5,7 @@ from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer
 from .models import User, Course
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
+from .utils import get_object_by_field, get_response_by_object, get_response_serializer_valid
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
@@ -21,11 +22,8 @@ class Login(APIView):
     if email is None or password is None:
       return Response({'error': 'Please provide both email and password'}, status=HTTP_400_BAD_REQUEST)
 
-    try:
-      user = User.objects.get(email=email)
-    except User.DoesNotExist:
-      user = None
-    
+    user = get_object_by_field(User, email, "email")
+
     if not user:
       return Response({'error': 'Invalid Email'}, status=HTTP_404_NOT_FOUND)
     else:
@@ -38,8 +36,9 @@ class Login(APIView):
 
 class Logout(APIView):
   def get(self, request):
-      request.user.auth_token.delete()
-      return Response({'success': 'Success Logout'}, status=HTTP_200_OK)
+    request.user.auth_token.delete()
+
+    return Response({'success': 'Success Logout'}, status=HTTP_200_OK)
 
 
 class Register(APIView):
@@ -47,12 +46,9 @@ class Register(APIView):
 
   def post(self, request):
     user_serializer = UserSerializer(data=request.data)
-    if user_serializer.is_valid():
-      user_serializer.save()
-      return Response({'success': 'Success register new user'}, status=HTTP_200_OK)
-    else:
-      return Response(user_serializer.errors, status=HTTP_400_BAD_REQUEST)
-    return Response(user_serializer.errors, status=HTTP_400_BAD_REQUEST)
+    response = get_response_serializer_valid(user_serializer, success_msg="Success Registering New User")
+    
+    return response
 
 
 class ProfileUser(APIView):
@@ -60,39 +56,45 @@ class ProfileUser(APIView):
   def get(self, request):
     user_profile = User.objects.get(pk=request.user.id)
     serializer = UserSerializer(user_profile)
+
     return Response(serializer.data)
 
 
 class CourseMain(APIView):
+  # Only available for admin
   permission_classes = (IsAdminUser,)
 
+  # Get all list of course
   def get(self, request):
-    courses = Course.objects.filter()
+    courses = Course.objects.all()
     serializer = CourseSerializer(courses, many=True)
+
     return Response(serializer.data)
 
+  # Create new course
   def post(self, request):
-    course_serializer = CourseSerializer(data=request.data)
-    if course_serializer.is_valid():
-      course_serializer.save()
-      return Response({'success': 'Success create new course'}, status=HTTP_200_OK)
-    else:
-      return Response(course_serializer.errors, status=HTTP_400_BAD_REQUEST)
-    return Response(course_serializer.errors, status=HTTP_400_BAD_REQUEST)
+    course_serializer = CourseSerializer(data=request.data, partial=True)
+    response = get_response_serializer_valid(course_serializer, success_msg="Success Creating New Course")
+    
+    return response
+
+
+class CourseUnit(APIView):
+
+  def get(self, request, id):
+    course    = get_object_by_field(Course, id)
+    response  = get_response_by_object(CourseSerializer, course, error_msg="Invalid Course ID")
+
+    return response
 
 
 class CourseToken(APIView):
   permission_classes = (IsAdminUser,)
 
   def get(self, request, id):
+    course    = get_object_by_field(Course, id)
+    response  = get_response_by_object(CourseTokenSerializer, course, error_msg="Invalid Course ID")
 
-    try:
-      course = Course.objects.get(id=int(id))
-    except:
-      course = None
+    return response
     
-    if not course:
-      return Response({'error': 'Invalid Course ID'}, status=HTTP_404_NOT_FOUND)
-    else:
-      serializer = CourseTokenSerializer(course)
-      return Response(serializer.data)
+
