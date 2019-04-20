@@ -1,5 +1,5 @@
-from .models import User, Course
-from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer
+# from .models import User, Course
+# from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
@@ -11,6 +11,16 @@ from rest_framework.status import (
 def get_object_by_field(model_, var_input, var_field):
   try:
     dictionary = {var_field: var_input}
+    obj = model_.objects.get(**dictionary)
+  except:
+    obj = None
+
+  return obj
+
+
+def get_object_by_many_field(model_, dictionary):
+  print(dictionary)
+  try:
     obj = model_.objects.get(**dictionary)
   except:
     obj = None

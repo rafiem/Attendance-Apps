@@ -3,8 +3,9 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from rest_framework.validators import UniqueValidator
 from django.utils import timezone
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from uuid import uuid4
+from .utils import get_object_by_many_field
 
 
 
@@ -69,21 +70,22 @@ class AttendClassSerializer(serializers.Serializer):
     start_time  = course.start_time.time()
     end_time    = course.end_time.time()
 
+    start_of_week = (validated_data["time_present"] - timedelta(days=validated_data["time_present"].weekday()))
+    end_of_week = (start_of_week + timedelta(days=6))
+    
+    dictionary = {"user_id": validated_data["user_id"], "course_id": validated_data["course_id"],
+                  "time_present__range": [start_of_week.strftime("%Y-%m-%d"), end_of_week.strftime("%Y-%m-%d")]}
+    already_attend = get_object_by_many_field(Attendance, dictionary)
+
+    if already_attend:
+      raise serializers.ValidationError({
+        "error": "Already submit attend on that course this week",
+      })
+
     if day_submit == day_course:
       if time_submit >= start_time and time_submit <= end_time:
-        try:
-          already_attend = Attendance.objects.get(user_id=validated_data["user_id"], 
-          course_id=validated_data["course_id"], time_present__day=validated_data["time_present"].day)
-        except:
-          already_attend = None
-
-        if not already_attend:
-          attend_course = Attendance.objects.create(**validated_data)
-          return attend_course
-        else:
-          raise serializers.ValidationError({
-            "error": "Already submit attend on that course this week",
-          })
+        attend_course = Attendance.objects.create(**validated_data)
+        return attend_course
     
     raise serializers.ValidationError({
       "error": "Not in time for that course schedule",
