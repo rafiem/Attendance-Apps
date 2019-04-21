@@ -1,7 +1,7 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
-from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer, AttendClassSerializer
+from .serializers import UserSerializer, CourseSerializer, CourseTokenSerializer, AttendClassSerializer, CourseAttendHistory
 from .models import User, Course, Attendance
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
@@ -151,6 +151,19 @@ class UserAttend(APIView):
 
     member_of_course  = Attendance.objects.filter(user_id=request.user.id, course_id=course.id)
     serializer        = AttendClassSerializer(member_of_course, many=True)
+
+    return Response(serializer.data)
+
+
+class CourseHistoryAttend(APIView):
+
+  def get(self, request, id):
+    course    = get_object_by_field(Course, id, "pk")
+    if not course:
+      return Response({"error": "Course not exist or invalid course id"})
+
+    attend_history = Attendance.objects.filter(course_id=course.id).values("time_present__date").distinct()
+    serializer = CourseAttendHistory(attend_history, many=True)
 
     return Response(serializer.data)
 

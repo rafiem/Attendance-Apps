@@ -19,7 +19,6 @@ def get_object_by_field(model_, var_input, var_field):
 
 
 def get_object_by_many_field(model_, dictionary):
-  print(dictionary)
   try:
     obj = model_.objects.get(**dictionary)
   except:
