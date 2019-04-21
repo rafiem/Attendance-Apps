@@ -5,11 +5,13 @@ from .views import (
   Logout,
   Register,
   ProfileUser,
+  UserCourse,
   CourseMain,
   CourseUnit,
   CourseToken,
   ApplyCourse,
-  AttendClass
+  AttendClass,
+  UserAttend
 )
 
 
@@ -17,7 +19,9 @@ urlpatterns = [
   path('login/', Login.as_view(), name='login'),
   path('logout/', Logout.as_view(), name='logout'),
   path('register/', Register.as_view(), name='register'),
-  path('profile/', ProfileUser.as_view(), name='profile'),
+  path('user/profile/', ProfileUser.as_view(), name='user_profile'),
+  path('user/course/', UserCourse.as_view(), name='user_course'),
+  path('user/course/<str:id>/attendance/', UserAttend.as_view(), name='user_attend'),
   path('course/', CourseMain.as_view(), name='course_main'),
   path('course/<str:id>/', CourseUnit.as_view(), name='course_unit'),
   path('course/<str:id>/token/', CourseToken.as_view(), name='course_token'),

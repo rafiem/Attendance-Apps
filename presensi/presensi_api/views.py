@@ -84,7 +84,7 @@ class CourseUnit(APIView):
 
   def get(self, request, id):
     course    = get_object_by_field(Course, id, "pk")
-    response  = get_response_by_object(CourseSerializer, course, error_msg="Invalid Course ID")
+    response  = get_response_by_object(CourseSerializer, course, error_msg="Course not exist or invalid course id")
 
     return response
 
@@ -94,7 +94,7 @@ class CourseToken(APIView):
 
   def get(self, request, id):
     course    = get_object_by_field(Course, id, "pk")
-    response  = get_response_by_object(CourseTokenSerializer, course, error_msg="Invalid Course ID")
+    response  = get_response_by_object(CourseTokenSerializer, course, error_msg="Course not exist or invalid course id")
 
     return response
 
@@ -128,12 +128,32 @@ class AttendClass(APIView):
       return Response({"error": "You are not a part of this course"})
 
     data = {"user_id": request.user.id, "course_id": course.id}
-    serializer = AttendClassSerializer(data=data)
+    serializer = AttendClassSerializer(data=data, partial=True)
+    response = get_response_serializer_valid(serializer, "Success attend a course this week")
 
-    if serializer.is_valid():
-      serializer.save()
-      return Response({"success": "Success attending a course"})
-    else:
-      return Response(serializer_.errors, status=HTTP_400_BAD_REQUEST)
+    return response
+
+
+class UserCourse(APIView):
+
+  def get(self, request):
+    courses = Course.objects.filter(user__id=request.user.id)
+    serializer = CourseSerializer(courses, many=True)
+    return Response(serializer.data)
+
+
+class UserAttend(APIView):
+
+  def get(self, request, id):
+    course    = get_object_by_field(Course, id, "pk")
+    if not course:
+      return Response({"error": "Course not exist or invalid course id"})
+
+    member_of_course  = Attendance.objects.filter(user_id=request.user.id, course_id=course.id)
+    serializer        = AttendClassSerializer(member_of_course, many=True)
+
+    return Response(serializer.data)
+
+
     
 

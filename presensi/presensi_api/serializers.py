@@ -10,12 +10,12 @@ from .utils import get_object_by_many_field
 
 
 class UserSerializer(serializers.Serializer):
-  name = serializers.CharField(required=True, max_length=50)
-  email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
-  password = serializers.CharField(write_only=True, required=True, min_length=6)
-  nim = serializers.CharField(required=True, max_length=20, validators=[UniqueValidator(queryset=User.objects.all())])
-  jurusan = serializers.CharField(required=True, max_length=50)
-  fakultas = serializers.CharField(required=True, max_length=50)
+  name      = serializers.CharField(required=True, max_length=50)
+  email     = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+  password  = serializers.CharField(write_only=True, required=True, min_length=6)
+  nim       = serializers.CharField(required=True, max_length=20, validators=[UniqueValidator(queryset=User.objects.all())])
+  jurusan   = serializers.CharField(required=True, max_length=50)
+  fakultas  = serializers.CharField(required=True, max_length=50)
 
 
   def create(self, validated_data):
@@ -58,6 +58,7 @@ class CourseTokenSerializer(serializers.Serializer):
 class AttendClassSerializer(serializers.Serializer):
   user_id     = serializers.IntegerField()
   course_id   = serializers.IntegerField()
+  time_present = serializers.DateTimeField()
 
   def create(self, validated_data):
     validated_data["time_present"] = datetime.now()
