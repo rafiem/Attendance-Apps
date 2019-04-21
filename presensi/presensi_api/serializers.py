@@ -59,7 +59,6 @@ class AttendClassSerializer(serializers.Serializer):
   user_id     = serializers.IntegerField()
   course_id   = serializers.IntegerField()
   time_present = serializers.DateTimeField()
-  time_present__date = serializers.DateField()
 
   def create(self, validated_data):
     validated_data["time_present"] = datetime.now()
